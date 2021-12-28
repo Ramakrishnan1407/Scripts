@@ -1,0 +1,24 @@
+az storage account create --name sasacal1088db88 --resource-group cal-1088-db --location westus --sku Standard_LRS --encryption-services blob 
+
+az storage container create --name calab --account-name sasacal1088db88 --auth-mode login
+
+az storage account blob-service-properties update -n sasacal1088db88 --enable-change-feed true --enable-versioning true
+
+VNETID=$(az network vnet show -g cal-980-7e -n lab-vnet --query [id] --output tsv)
+
+terraform import azurerm_virtual_network.vnet $VNETID
+
+sudo apt-get -y install openjdk-8-jdk openjdk-8-jre
+
+java -version
+
+cat >> /etc/environment <<EOL
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
+EOL
+
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo apt update
+
+sudo systemctl start jenkins
